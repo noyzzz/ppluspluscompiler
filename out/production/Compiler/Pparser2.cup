@@ -1,0 +1,160 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.BufferedReader;
+import java.io.*;
+parser code {:
+    // Connect this parser to a scanner!
+    Plexer s;
+    parser(Plexer s){ this.s=s; }
+        public static void main(String[] args) throws Exception {
+            ComplexSymbolFactory csf = new ComplexSymbolFactory();
+            InputStream inputStream       = new FileInputStream("input.in");
+            Plexer plexer = new Plexer(new BufferedReader(new InputStreamReader(inputStream)),csf);
+            ScannerBuffer lexer = new ScannerBuffer
+                    (plexer);
+            parser p = new parser(plexer);
+
+            p.parse();
+    /*        Reader br = new BufferedReader(new InputStreamReader(System.in));;
+            Plexer plexer = new Plexer(br,new ComplexSymbolFactory());
+            parser parser = new parser(plexer, new ComplexSymbolFactory());
+            parser.parse();*/
+        }
+:}
+scan with {: return s.next_token(); :};
+terminal ID, EXTERN, LBRAC, RBRAC, INT, BOOL, FLOAT, LONG, CHAR, DOUBLE, STRING, VOID, AUTO, BEGIN;
+terminal END, RECORD, CONST, RETURN, BREAK, CONTINUE, SIZEOF, IF, ELSE, SWITCH, OF, CASE, INT_CONST;
+terminal DEFAULT, FOR, REPEAT, UNTIL, FOREACH, IN, REAL_CONST, CHAR_CONST, BOOL_CONST, STRING_CONST;
+terminal SEMICOLON;
+terminal LONG_CONST;
+terminal INPUT, FUNCTION, OUTPUT, STATIC, GOTO, INT_TYPE;
+terminal LPAR, RPAR;
+terminal PLUS, MINUS, TIMES, SLASH, MOD, AMPERSAND, PIPE, CARET;
+terminal ISEQUAL, NOTEQUAL, LEQ, GEQ, LESS, GREATER, AND, OR, NOT;
+terminal EQUAL;
+terminal TILDE, MINUSMINUS, PLUSPLUS, EXCLAM;
+terminal COMMA;
+terminal COLON;
+terminal LBRACE, RBRACE;
+nonterminal program;
+nonterminal func_extern;
+nonterminal func_dcl;
+nonterminal extern_dcl;
+nonterminal arguments;
+nonterminal type;
+nonterminal struct_dec;
+nonterminal var_dcl;
+nonterminal var_dcl_cnt;
+nonterminal block;
+nonterminal statement;
+nonterminal assignment;
+nonterminal method_call;
+nonterminal parameters;
+nonterminal cond_stmt;
+nonterminal loop_stmt;
+nonterminal expr;
+nonterminal variable;
+nonterminal binary_op;
+nonterminal arithmatic;
+nonterminal conditional;
+nonterminal const_val;
+nonterminal idarray;
+nonterminal var_dcls;
+nonterminal var_dcl_no_const;
+nonterminal var_dcl_cnt_extend;
+nonterminal var_dcls_or_statements;
+nonterminal switch_case_cases;
+nonterminal var_dcl_epsilon;
+nonterminal assignment_expr_epsilon;
+nonterminal array_index_recursive;
+nonterminal brac;
+terminal UMINUS;
+nonterminal variable_prime;
+terminal COMMENT;
+/* Precedences */
+
+precedence right EQUAL;
+precedence left PIPE;
+precedence left CARET;
+precedence left AMPERSAND;
+precedence left ISEQUAL, NOTEQUAL;
+precedence left AND, OR;
+precedence left LEQ,LESS, GEQ, GREATER;
+precedence left PLUS, MINUS;
+precedence left TIMES, SLASH, MOD;
+precedence right EXCLAM;
+precedence left  LBRAC, RBRAC, LPAR, RPAR;
+precedence right PLUSPLUS, MINUSMINUS, NOT, TILDE;
+precedence left UMINUS;
+program ::= var_dcl{:System.out.println("var_dcl found");:} | func_extern {:System.out.println("func_extern ==> program");:}| struct_dec {:System.out.println("struct dec ==> program");:}| var_dcl program {:System.out.println("var dcl program ==> program");:}| func_extern program {:System.out.println("func dcl program ==> program");:}| struct_dec program {:System.out.println("strcut dec program");:};
+func_extern ::= func_dcl{:System.out.println("func dcl ==> func extern");:} | extern_dcl{:System.out.println("extern dcl ==> func extern");:};
+func_dcl ::= type ID:i LPAR RPAR SEMICOLON {:System.out.println("type" + i + " LPAR RPAR SEMICOLON ==> func dcl");:} | type ID:i LPAR arguments RPAR SEMICOLON {:System.out.println("type "+ i + " LPAR arguments RPAR SEMICOLON ==> func dcl");:} | type ID:i LPAR RPAR block {:System.out.println("type " + i + " LPAR RPAR block ==> func dcl");:}
+| type ID:i LPAR arguments RPAR block {:System.out.println("type " + i + " LPAR arguments RPAR block ==> func dcl");:};
+extern_dcl ::= EXTERN type ID:i SEMICOLON {:System.out.println("EXTERN type " + i + " SEMICOLON ==> extern dcl");:};
+brac ::= LBRAC RBRAC brac | LBRAC RBRAC {:System.out.println("LBRAC RBRAC");:};
+idarray ::=  | brac {:System.out.println("brac ==> idarray");:};
+arguments ::= type ID:i idarray {:System.out.println("type " + i + " idarray ==> arguments");:}| type ID:i idarray COMMA arguments {:System.out.println("type " + i + " idarray COMMA arguments ==> arguments");:};
+type ::= INT{:System.out.println("INT ==> type");:} | BOOL {:System.out.println("BOOL ==> type");:}| FLOAT {:System.out.println("FLOAT ==> type");:}| LONG {:System.out.println("LONG ==> type");:}| CHAR {:System.out.println("CHAR ==> type");:}| DOUBLE {:System.out.println("DOUBLE ==> type");:}| ID:i {:System.out.println( i + " ==> type");:} | STRING {:System.out.println("STRING ==> type");:}| VOID {:System.out.println("VOID ==> type");:}| AUTO{:System.out.println("AUTO ==> type");:};
+struct_dec ::= RECORD ID:i BEGIN var_dcls END RECORD SEMICOLON {:System.out.println("RECORD " + i + " BEGIN var dcls END RECORD SEMICOLON");:};
+var_dcls ::= var_dcl {:System.out.println("var dcl ==> var dcls");:} | var_dcl var_dcls{:System.out.println("var dcl var dcls ==> var dcls");:};
+var_dcl_no_const ::= type var_dcl_cnt SEMICOLON {:System.out.println("type var dcl cnt SEMICOLON ==> var dcl no const");:}|
+type var_dcl_cnt var_dcl_cnt_extend SEMICOLON{:System.out.println("type var dcl cnt var dcl cnt extend ==> var dcl no const");:} ;
+var_dcl_cnt_extend ::= COMMA var_dcl_cnt var_dcl_cnt_extend {:System.out.println("COMMA var dcl cnt var dcl cnt extend ==> var dcl extend");:}| COMMA var_dcl_cnt {:System.out.println("COMMA var dcl cnt ==> var dcl cnt extend");:};
+var_dcl ::= var_dcl_no_const {:System.out.println("var dcl no const ==> var dcl");:}| CONST var_dcl_no_const{:System.out.println("CONST var dcl no const ==> var dcl");:};
+var_dcl_cnt ::= variable_prime {:System.out.println("variable prime ==> var dcl cnt");:} | variable_prime EQUAL expr {:System.out.println("variable prime EQUAL expr ==> var dcl cnt");:};
+variable_prime ::= ID:i {:System.out.println(i + " ==> variable prime");:}| ID:i array_index_recursive{:System.out.println(i + " array index recursive ==> variable prime");:};
+block ::= BEGIN END {:System.out.println("BEGIN END ==> block");:}|BEGIN var_dcls_or_statements END {:System.out.println("BEGIN var dcls or statements END ==> block");:};
+var_dcls_or_statements ::= var_dcl var_dcls_or_statements {:System.out.println("var dcl var dcls or statements ==> var dcls or statements");:}| statement var_dcls_or_statements {:System.out.println("statement var dcls or statements ==> var dcls or statements");:}
+| var_dcl {:System.out.println("var dcl ==> var dcls or statements");:} | statement {:System.out.println("statement ==> var dcls or statements");:};
+statement ::= assignment {:System.out.println("assignment ==> statement");:} | method_call SEMICOLON {:System.out.println("method call SEMICOLON ==> statement");:}| cond_stmt {:System.out.println("cond stmt ==> statement");:}| loop_stmt {:System.out.println("loop statement ==> statement");:}| RETURN SEMICOLON{:System.out.println("RETURN SEMICOLON ==> statement");:}
+| RETURN expr SEMICOLON {:System.out.println("RETURN expr SEMICOLON ==> statement");:}| BREAK SEMICOLON {:System.out.println("BREAK SEMICOLON ==> statement");:} | CONTINUE SEMICOLON {:System.out.println("CONTINUE SEMICOLON ==> statement");:}| SIZEOF LPAR type RPAR {:System.out.println("SIZEOF LPAR type RPAR ==> statement");:};
+assignment ::= variable EQUAL expr SEMICOLON {:System.out.println("variable EQUAL expr SEMICOLON");:};
+method_call ::= ID:i LPAR RPAR {:System.out.println(i + " LPAR RPAR");:} | ID:i LPAR parameters RPAR {:System.out.println(i + "LPAR parameters RPAR");:};
+parameters ::= expr {:System.out.println("expr ==> parameters");:}| expr COMMA  parameters {:System.out.println("expr COMMA parameters ==> parameters");:};
+switch_case_cases ::= CASE INT_CONST COLON block switch_case_cases {:System.out.println("CASE INT_CONST COLON block switch case cases ==> switch case cases");:}| CASE INT_CONST COLON block {:System.out.println("CASE INT_CONST COLON block ==> switch case cases");:};
+cond_stmt ::= IF LPAR expr RPAR block  {:System.out.println("IF LPAR expr RPAR block ==> cond stmt");:}| IF LPAR expr RPAR block  ELSE  block{:System.out.println("IF LPAR expr RPAR block ELSE block ==> cond stmt");:}
+| SWITCH LPAR ID:i RPAR OF COLON LBRACE DEFAULT COLON block RBRACE {:System.out.println("SWITCH LPAR " + i + " RPAR OF COLON LBRACE DEFAULT COLON block RBRACE   ==> cond stmt");:}|
+SWITCH LPAR ID:i RPAR OF COLON LBRACE switch_case_cases DEFAULT COLON block RBRACE{:System.out.println("SWITCH LPAR " + i + " RPAR OF COLON LBRACE switch case cases DEFAULT COLON block RBRACE ==> cond stmt");:};
+var_dcl_epsilon ::=  | var_dcl {:System.out.println("var dcl ==> var dcl epsilon");:};
+assignment_expr_epsilon::= assignment {:System.out.println("assignment ==> assignment expr epsilon");:}| | expr {:System.out.println("expr ==> assignment expr epsilon");:};
+loop_stmt ::= FOR LPAR var_dcl_epsilon SEMICOLON expr SEMICOLON assignment_expr_epsilon RPAR block {:System.out.println("FOR LPAR vart dcl epsilon SEMICOLON expr SEMICOLON assignment expr epsilon ==> loop stmt");:}|
+REPEAT block UNTIL LPAR expr RPAR SEMICOLON {:System.out.println("REPEAT block UNTIL LPAR expr RPAR SEMICOLON ==> loop stmt");:}| FOREACH LPAR ID IN ID RPAR block {:System.out.println("FOREACH LPAR ID IN ID RPAR block ==> loop stmt");:};
+expr ::= expr binary_op expr {:System.out.println("expr binary op expr ==> expr");:} | LPAR expr RPAR {:System.out.println("LPAR expr RPAR ==> expr");:}| method_call {:System.out.println("method call ==> expr");:}| variable {:System.out.println("variable ==> expr");:}| const_val{:System.out.println("const val ==> expr");:} | MINUS expr  {:System.out.println("MINUS expr ==> expr");:}%prec UMINUS|
+ EXCLAM expr{:System.out.println("EXCLAM expr ==> expr");:};
+
+
+variable ::= ID:i{:System.out.println(i + " ==> variable");:} |
+ ID array_index_recursive {:System.out.println("ID array_index_recursive --> variable");:}|
+TILDE variable {:System.out.println("Tilde variable --> variable");:}|
+ MINUSMINUS variable{:System.out.println("MINUS MINUS variable --> variable");:} |
+  PLUSPLUS variable {:System.out.println("PLUSPLUS variable --> variable");:}|
+   variable MINUSMINUS {:System.out.println("variable MINUS MINUS--> variable");:}|
+   variable PLUSPLUS {:System.out.println("variable PLUSPLUS --> variable");:};
+array_index_recursive ::= LBRAC expr RBRAC {:System.out.println("LBRAC expr RBAC --> array_index_recursive");:}|
+ LBRAC expr RBRAC  array_index_recursive
+ {:System.out.println("LBRAC expr RBAC array_index_recursive --> array_index_recursive");:};
+binary_op ::= arithmatic {:System.out.println("arithmatic--> binary_op");:} |
+ conditional{:System.out.println("conditional --> binary_op");:};
+arithmatic ::= PLUS {:System.out.println("PLUS --> arithmatic");:} |
+MINUS {:System.out.println("MINUS --> arithmatic");:}|
+TIMES {:System.out.println("TIMES --> arithmatic");:}|
+ SLASH {:System.out.println("SLASH --> arithmatic");:}|
+ MOD {:System.out.println("MOD --> arithmatic");:}|
+ AMPERSAND {:System.out.println("AMPERSAND --> arithmatic");:}|
+  PIPE {:System.out.println("PIPE --> arithmatic");:}|
+  CARET{:System.out.println("CARET --> arithmatic");:};
+conditional ::= ISEQUAL {:System.out.println("IS_EQUAL --> conditional");:} |
+ NOTEQUAL {:System.out.println("NOT_EQUAL --> conditional ");:}|
+ GEQ {:System.out.println("GEQ --> conditional ");:}|
+  LEQ {:System.out.println("LEQ --> conditional ");:}|
+ LESS {:System.out.println("LESS --> conditional");:}|
+  GREATER {:System.out.println("GREATER --> conditional");:}|
+  AND {:System.out.println("AND --> conditional");:}|
+   OR{:System.out.println("OR --> conditional");:} |
+    NOT {:System.out.println("NOT --> conditional");:};
+const_val ::= INT_CONST {:System.out.println("INT_CONST --> const_val");:} |
+ REAL_CONST{:System.out.println("REAL_CONST--> const_val");:} |
+ CHAR_CONST:c{:System.out.println("CHAR_CONST--> const_val  "+ c + " = char value");:} |
+  BOOL_CONST {:System.out.println("BOOL_CONST--> const_val");:}|
+   STRING_CONST{:System.out.println("STRING_CONST--> const_val");:} |
+    LONG_CONST {:System.out.println("LONG_CONST--> const_val");:} ;

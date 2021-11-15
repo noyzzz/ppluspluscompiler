@@ -1,0 +1,369 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.BufferedReader;
+import java.io.*;
+import IR.*;
+import visitor.*;
+import syntaxtree.*;
+import symboltable.*;
+parser code {:
+    // Connect this parser to a scanner!
+    Plexer s;
+    parser(Plexer s){ this.s=s; }
+ public static void main(String[] args) throws Exception {
+        ComplexSymbolFactory csf = new ComplexSymbolFactory();
+        InputStream inputStream = new FileInputStream("input.in");
+        Plexer plexer = new Plexer(new BufferedReader(new InputStreamReader(inputStream)), csf);
+        ScannerBuffer lexer = new ScannerBuffer
+                (plexer);
+        parser p = new parser(plexer);
+        Symbol parse_tree = p.parse();
+
+        File output = new File("output.ll");
+        FileWriter fileWriter = new FileWriter("output.ll");
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        Program program = ((Program) parse_tree.value);
+        if (program != null) {
+            BuildSymbolTableVisitor bstVisitor = new BuildSymbolTableVisitor();
+            bstVisitor.visit(program);
+            Scope symbolTable = bstVisitor.getFirstScope();
+            IRVisitor intermediateVisitor = new IRVisitor((SymbolTable) symbolTable);
+            intermediateVisitor.visit(program);
+
+            List<Quadruple> IRList = intermediateVisitor.IRlist;
+            ArrayList<DclIR> DCLList = bstVisitor.dclList;
+            ArrayList<StructIR> structIRS = bstVisitor.structList;
+            CodeGenerator codeGenerator = new CodeGenerator(intermediateVisitor, (SymbolTable) symbolTable);
+            codeGenerator.DCLlistHandler(DCLList);
+            codeGenerator.StructListHandler(structIRS);
+            for (int i = 0; i < IRList.size(); i++) {
+                if (IRList.get(i) instanceof AssignmentIR) {
+                    codeGenerator.AssignmentHandler(i);
+                } else if (IRList.get(i) instanceof ReturnIR)
+                    codeGenerator.ReturnHandler(i);
+                else if (IRList.get(i) instanceof ConditionalBranch) {
+                    codeGenerator.ConditionalBranchHandler(i);
+                } else if (IRList.get(i) instanceof MethodCallIR)
+                    codeGenerator.methodCallHandler(i);
+                else if (IRList.get(i) instanceof StringGeneratorIR)
+                    codeGenerator.StringGeneratorHandler(i);
+                else if (IRList.get(i) instanceof GenerateMethodSignature)
+                    codeGenerator.GenerateMethodSignatureHandler(i);
+                else if (IRList.get(i) instanceof VariableAssignIR)
+                    codeGenerator.VariableAssignIRHandler(i);
+                else if (IRList.get(i) instanceof UnconditionalBranchIR)
+                    codeGenerator.UnconditionalBranch(i);
+                else if (IRList.get(i) instanceof RetIR)
+                    codeGenerator.RetIRHandler(i);
+                else if (IRList.get(i) instanceof MakeLabelIR)
+                    codeGenerator.MakeLabelHandler(i);
+                else if(IRList.get(i) instanceof AssignFromVariableIR)
+                    codeGenerator.AssignFromVariableIRHandler(i);
+                else if(IRList.get(i) instanceof AssignToArrayIR)
+                  codeGenerator.AssignToArrayHandler(i);
+                else if(IRList.get(i) instanceof ArithmaticLocalIR)
+                  codeGenerator.ArithmaticLocalIRHandler(i);
+                else if(IRList.get(i) instanceof ForEachConditionalBr)
+                  codeGenerator.ForEachConditionalBrHandler(i);
+                else if (IRList.get(i) instanceof SwitchIR)
+                  codeGenerator.SwitchIRHandler(i);
+                else throw new Exception("shitttt");
+
+            }
+            System.out.println();
+            if(codeGenerator.stringGlobalCodeList!=null){
+              for (String s :
+                      codeGenerator.stringGlobalCodeList) {
+                bufferedWriter.write(s);
+                bufferedWriter.newLine();
+
+              }
+
+            }
+            if(codeGenerator.StandardFunctionDeclarations!=null){
+              for (String s :
+                      codeGenerator.StandardFunctionDeclarations) {
+                bufferedWriter.write(s);
+                bufferedWriter.newLine();
+
+              }
+            }
+          if (codeGenerator.Structlist != null)
+            for (String s :
+                    codeGenerator.Structlist) {
+              bufferedWriter.write(s);
+              bufferedWriter.newLine();
+
+            }
+            if (codeGenerator.DCLlist != null)
+                for (String s :
+                        codeGenerator.DCLlist) {
+                    bufferedWriter.write(s);
+                    bufferedWriter.newLine();
+
+                }
+
+            for (String s :
+                    codeGenerator.codes) {
+                bufferedWriter.write(s);
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.close();
+            fileWriter.close();
+
+        }
+
+
+    /*        Reader br = new BufferedReader(new InputStreamReader(System.in));;
+            Plexer plexer = new Plexer(br,new ComplexSymbolFactory());
+            parser parser = new parser(plexer, new ComplexSymbolFactory());
+            parser.parse();*/
+    }
+:}
+scan with {: return s.next_token(); :};
+terminal EXTERN, LBRAC, RBRAC, INT, BOOL, FLOAT, LONG, CHAR, DOUBLE, STRING, VOID, AUTO, BEGIN;
+terminal END, RECORD, CONST, RETURN, BREAK, CONTINUE, SIZEOF, IF, ELSE, SWITCH, OF, CASE;
+terminal Integer INT_CONST;
+terminal Character CHAR_CONST;
+terminal Boolean BOOL_CONST;
+terminal String STRING_CONST;
+terminal Double REAL_CONST;
+terminal DEFAULT, FOR, REPEAT, UNTIL, FOREACH, IN ;
+terminal SEMICOLON;
+terminal LONG_CONST;
+terminal INPUT, FUNCTION, OUTPUT, STATIC, GOTO, INT_TYPE;
+terminal LPAR, RPAR;
+terminal PLUS, MINUS, TIMES, SLASH, MOD, AMPERSAND, PIPE, CARET;
+terminal ISEQUAL, NOTEQUAL, LEQ, GEQ, LESS, GREATER, AND, OR, NOT;
+terminal EQUAL;
+terminal TILDE, MINUSMINUS, PLUSPLUS, EXCLAM;
+terminal COMMA;
+terminal COLON;
+terminal LBRACE, RBRACE;
+terminal UMINUS;
+terminal COMMENT;
+terminal String ID;
+terminal DOT;
+
+nonterminal Assignment assignment_epsilon;
+nonterminal Program program;
+nonterminal Func_Extern func_extern;
+nonterminal Func_Dcl func_dcl;
+nonterminal Extern_Dcl extern_dcl;
+nonterminal Arguments arguments;
+nonterminal Type type;
+nonterminal Struct_Dec struct_dec;
+nonterminal Var_Dcls var_dcl_same_type;
+nonterminal Var_Dcl var_dcl_cnt;
+nonterminal Block block;
+nonterminal Statement statement;
+nonterminal Assignment assignment;
+nonterminal Method_Call method_call;
+nonterminal Parameters parameters;
+nonterminal Cond_Stmt cond_stmt;
+nonterminal Loop_Stmt loop_stmt;
+nonterminal Expr expr;
+nonterminal Variable variable;
+nonterminal Binary_Op binary_op;
+nonterminal Arithmatic arithmatic;
+nonterminal Conditional conditional;
+nonterminal Const_Val const_val;
+nonterminal Idarray idarray;
+nonterminal Var_Dcls var_dcls;
+nonterminal Var_Dcls var_dcl_no_const;
+nonterminal Var_Dcls var_dcl_cnt_extend;
+nonterminal Var_Dcls_Or_Statements var_dcls_or_statements;
+nonterminal Switch_Case_Cases switch_case_cases;
+nonterminal Var_Dcls var_dcl_epsilon;
+nonterminal Object assignment_expr_epsilon;
+nonterminal Array_Index_Recursive array_index_recursive;
+nonterminal Brac brac;
+nonterminal Variable variable_prime;
+nonterminal Identifier identifier;
+nonterminal Expr expr_prime;
+
+/* Precedences */
+
+precedence right EQUAL;
+precedence left PIPE;
+precedence left CARET;
+precedence left AMPERSAND;
+precedence left ISEQUAL, NOTEQUAL;
+precedence left AND, OR;
+precedence left LEQ,LESS, GEQ, GREATER;
+precedence left PLUS, MINUS;
+precedence left TIMES, SLASH, MOD;
+precedence right EXCLAM;
+precedence left  LBRAC, RBRAC, LPAR, RPAR;
+precedence right PLUSPLUS, MINUSMINUS, NOT, TILDE;
+precedence left UMINUS;
+
+
+program ::= var_dcl_same_type:vd{:RESULT = new Program(vd);:}
+    | func_extern:fe {:RESULT = new Program(fe);:}
+    | struct_dec:sd {:RESULT = new Program(sd);:}
+    | var_dcl_same_type:vd program :p{:RESULT = new Program(vd, p);:}
+    | func_extern:fe program:p {:RESULT = new Program(fe, p);:}
+    | struct_dec:sd program:p {:RESULT = new Program(sd, p);:};
+
+func_extern ::= func_dcl:fd{:RESULT = new Func_Extern(fd);:}
+    | extern_dcl:ed{:RESULT = new Func_Extern(ed);:};
+
+func_dcl ::= FUNCTION type:t identifier:i LPAR RPAR SEMICOLON {:RESULT = new Func_Dcl(t, i);:}
+    | FUNCTION type:t identifier:i LPAR arguments:a RPAR SEMICOLON {:RESULT = new Func_Dcl(t, i, a);:}
+    | FUNCTION  type:t identifier:i LPAR RPAR block:b {:RESULT = new Func_Dcl(t, i, b);:}
+    | FUNCTION type:t identifier:i LPAR arguments:a RPAR block:b {:RESULT = new Func_Dcl(t, i, a, b);:};
+
+extern_dcl ::= EXTERN type:t identifier:i SEMICOLON {:RESULT = new Extern_Dcl(t, i);:};
+
+brac ::= LBRAC RBRAC brac:b {:RESULT = new Brac(b);:}
+    | LBRAC RBRAC {:RESULT = new Brac();:};
+
+idarray ::=  {:RESULT = new Idarray();:}
+    | brac:b {:RESULT = new Idarray(b);:};
+
+arguments ::= type:t identifier:i idarray:ia {:RESULT = new Arguments(t, i, ia);:}
+    | type:t identifier:i idarray:ia COMMA arguments:a {:RESULT = new  Arguments(t, i, ia, a);:};
+
+type ::= INT{:RESULT = new Type(Type.TypeEnum.INT);:}
+    | BOOL {:RESULT = new Type(Type.TypeEnum.BOOL);:}
+    | FLOAT {:RESULT = new Type(Type.TypeEnum.FLOAT);:}
+    | LONG {:RESULT = new Type(Type.TypeEnum.LONG);:}
+    | CHAR {:RESULT = new Type(Type.TypeEnum.CHAR);:}
+    | DOUBLE {:RESULT = new Type(Type.TypeEnum.DOUBLE);:}
+    | STRING {:RESULT = new Type(Type.TypeEnum.STRING);:}
+    | VOID {:RESULT = new Type(Type.TypeEnum.VOID);:}
+    | AUTO {:RESULT = new Type(Type.TypeEnum.AUTO);:}
+    | identifier:i {:RESULT = new Type(Type.TypeEnum.ID, i);:};
+struct_dec ::= RECORD identifier:i BEGIN var_dcls:v END RECORD SEMICOLON {:RESULT = new Struct_Dec(i, v);:};
+
+var_dcls ::= var_dcl_same_type:v {:RESULT = v;:}
+    | var_dcl_same_type:v var_dcls:vs{:RESULT = new Var_Dcls(v, vs);:};
+
+var_dcl_no_const ::= type:t var_dcl_cnt:v SEMICOLON {:RESULT = new Var_Dcls(t,v);:}
+    |type:t var_dcl_cnt:v var_dcl_cnt_extend:ve SEMICOLON{:RESULT = new Var_Dcls(t, v, ve);:};
+
+var_dcl_cnt_extend ::= COMMA var_dcl_cnt:v var_dcl_cnt_extend:vd {:RESULT = new Var_Dcls(v, vd);:}
+    | COMMA var_dcl_cnt:v {:RESULT = new Var_Dcls(v);:};
+
+var_dcl_same_type ::= var_dcl_no_const:vd {:RESULT = new Var_Dcls(false, vd);:}
+    | CONST var_dcl_no_const:vd {:RESULT = new Var_Dcls(true, vd);:};
+
+var_dcl_cnt ::= variable_prime:v {:RESULT = new Var_Dcl(v);:}
+    | variable_prime:v EQUAL expr:e {:RESULT = new Var_Dcl(v, e);:};
+
+variable_prime ::= identifier:i {:RESULT = new Variable(Variable.VariableType.IDENTIFIER, i);:}
+    | identifier:i array_index_recursive:ai{:RESULT = new Variable(Variable.VariableType.ARRAY_IDENTIFIER, i, ai);:}
+    |variable_prime:v DOT identifier:i {:RESULT= new Variable(Variable.VariableType.RECORD_ITEM, v, i);:};
+
+
+block ::= BEGIN END {:RESULT = new Block();:}
+    |BEGIN var_dcls_or_statements:vo END {:RESULT = new Block(vo);:};
+
+var_dcls_or_statements ::= var_dcl_same_type:vs var_dcls_or_statements:vo {:RESULT = new Var_Dcls_Or_Statements(vs, vo);:}
+    | statement:s var_dcls_or_statements:vo {:RESULT = new Var_Dcls_Or_Statements(s, vo);:}
+    | var_dcl_same_type:v {:RESULT = new Var_Dcls_Or_Statements(v);:}
+    | statement:s {:RESULT = new Var_Dcls_Or_Statements(s);:};
+
+statement ::= assignment:a SEMICOLON {:RESULT  = new Statement(Statement.StatementEnum.ASSIGNMENT, a);:}
+    | method_call:m SEMICOLON {:RESULT = new Statement(Statement.StatementEnum.METHOD_CALL, m);:}
+    | cond_stmt:c {:RESULT = new Statement(Statement.StatementEnum.COND_STMT, c);:}
+    | loop_stmt:l {:RESULT = new Statement(Statement.StatementEnum.LOOP_STMT, l);:}
+    | RETURN SEMICOLON{:RESULT = new Statement(Statement.StatementEnum.RETURN_VOID);:}
+    | RETURN expr:e SEMICOLON {:RESULT = new Statement(Statement.StatementEnum.RETURN_EXP, e);:}
+    | BREAK SEMICOLON {:RESULT = new Statement(Statement.StatementEnum.BREAK);:}
+    | CONTINUE SEMICOLON {:RESULT = new Statement(Statement.StatementEnum.CONTINUE);:};
+
+assignment ::= variable_prime:v EQUAL expr:e  {:RESULT = new Assignment(v, e);:};
+
+method_call ::= identifier:i LPAR RPAR {:RESULT = new Method_Call(i);:}
+    | identifier:i LPAR parameters:p RPAR {:RESULT = new Method_Call(i, p);:};
+
+parameters ::= expr:e {:RESULT = new Parameters(e);:}
+    | expr:e COMMA  parameters:p {:RESULT = new Parameters(e, p);:};
+
+switch_case_cases ::= CASE INT_CONST:i COLON block:b switch_case_cases:s {:RESULT = new Switch_Case_Cases(i, b, s);:}
+    | CASE INT_CONST:i COLON block:b {:RESULT = new Switch_Case_Cases(i, b);:};
+
+cond_stmt ::= IF LPAR expr:e RPAR block:b  {:RESULT = new Cond_Stmt(syntaxtree.Cond_Stmt.Cond_Stmt_enum.IF, e, b);:}
+    | IF LPAR expr:e RPAR block:b1  ELSE  block:b2 {:RESULT = new Cond_Stmt(syntaxtree.Cond_Stmt.Cond_Stmt_enum.IFELSE, e, b1, b2);:}
+    | SWITCH LPAR identifier:i RPAR OF COLON  DEFAULT COLON block:b  {:RESULT = new Cond_Stmt(syntaxtree.Cond_Stmt.Cond_Stmt_enum.DEFAULT_SWITCH, i, b);:}
+    | SWITCH LPAR identifier:i RPAR OF COLON  switch_case_cases:s DEFAULT COLON block:b {:RESULT = new Cond_Stmt(syntaxtree.Cond_Stmt.Cond_Stmt_enum.SWITCH, i, s, b);:};
+
+var_dcl_epsilon ::=
+    {:RESULT = null;:}  //epsilon
+    | var_dcl_same_type:v {:RESULT = v;:};
+
+assignment_expr_epsilon::= assignment:a {:RESULT = a;:}
+    | {:RESULT = null;:}    //epsilon
+    | expr:e {:RESULT = e;:};
+
+assignment_epsilon ::= assignment:a {:RESULT = a;:}
+    | {:RESULT = null;:}
+    ;
+
+loop_stmt ::= FOR LPAR assignment_epsilon :ae SEMICOLON expr:e SEMICOLON assignment_expr_epsilon:a RPAR block:b {:RESULT = new Loop_Stmt(Loop_Stmt.LoopType.FOR, ae, e, a, b);:}
+    | REPEAT block:b UNTIL LPAR expr:e RPAR SEMICOLON {:RESULT = new Loop_Stmt(Loop_Stmt.LoopType.REPEAT, b, e);:}
+    | FOREACH LPAR identifier:i1 IN identifier:i2 RPAR block:b {:RESULT = new Loop_Stmt(Loop_Stmt.LoopType.FOREACH ,i1, i2, b);:};
+
+expr ::= expr:e1 binary_op:bo expr:e2 {:RESULT = new Expr(Expr.ExprType.BINARY_EXPR, e1, bo, e2);:}
+     | LPAR expr:e RPAR {:RESULT = new Expr(Expr.ExprType.EXPR, e);:}
+     | method_call:m {:RESULT = new Expr(Expr.ExprType.METHOD_CALL, m);:}
+     | variable:v {:RESULT = new Expr(Expr.ExprType.VARIABLE,     v);:}
+     | const_val:c{:RESULT = new Expr(Expr.ExprType.CONST_VAL, c);:}
+     | MINUS expr:e  {:RESULT = new Expr(Expr.ExprType.UMINUS, e);:}%prec UMINUS
+     | TILDE expr_prime:e{:RESULT = new Expr(Expr.ExprType.TILDE,  e);:}
+     | SIZEOF LPAR  type:t RPAR {:RESULT = new Expr(Expr.ExprType.SIZEOF, t);:};
+
+
+expr_prime ::= expr_prime:e1 binary_op:bo expr:e2 {:RESULT = new Expr(Expr.ExprType.BINARY_EXPR, e1, bo, e2);:}
+     | LPAR expr:e RPAR {:RESULT = new Expr(Expr.ExprType.EXPR, e);:}
+     | method_call:m {:RESULT = new Expr(Expr.ExprType.METHOD_CALL, m);:}
+     | const_val:c{:RESULT = new Expr(Expr.ExprType.CONST_VAL, c);:}
+     | MINUS expr:e  {:RESULT = new Expr(Expr.ExprType.UMINUS, e);:}%prec UMINUS
+     | SIZEOF LPAR type:t RPAR {:RESULT = new Expr(Expr.ExprType.SIZEOF, t);:};
+
+
+
+variable ::= identifier:i{:RESULT = new Variable(Variable.VariableType.IDENTIFIER, i);:}
+    |identifier:i array_index_recursive:a {:RESULT = new Variable(Variable.VariableType.ARRAY_IDENTIFIER, i, a);:}
+    |TILDE variable:v {:RESULT = new Variable(Variable.VariableType.TILDE_VARIABLE, v);:}
+    |MINUSMINUS variable:v{:RESULT = new Variable(Variable.VariableType.MINUSMINUS_VARIABLE, v);:}
+    |PLUSPLUS variable:v {:RESULT = new Variable(Variable.VariableType.PLUSPLUS_VARIABLE, v);:}
+    |variable:v MINUSMINUS {:RESULT = new Variable(Variable.VariableType.VARIABLE_MINUSMINUS, v);:}
+    |variable:v PLUSPLUS {:RESULT = new Variable(Variable.VariableType.VARIABLE_PLUSPLUS, v);:}
+    |variable_prime:v DOT identifier:i {:RESULT= new Variable(Variable.VariableType.RECORD_ITEM, v, i);:};
+
+array_index_recursive ::= LBRAC expr:e RBRAC {:RESULT = new Array_Index_Recursive(e);:}
+    |LBRAC expr:e RBRAC  array_index_recursive:ai {:RESULT = new Array_Index_Recursive(e, ai);:};
+
+binary_op ::= arithmatic:a {:RESULT = new Binary_Op(a);:}
+    |conditional:c {:RESULT = new Binary_Op(c);:};
+
+arithmatic ::= PLUS {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.PLUS);:}
+    |MINUS {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.MINUS);:}
+    |TIMES {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.TIMES);:}
+    |SLASH {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.SLASH);:}
+    |MOD {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.MOD);:}
+    |AMPERSAND {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.AMPERSAND);:}
+    |PIPE {:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.PIPE);:}
+    |CARET{:RESULT = new Arithmatic(Arithmatic.ArithmaticSign.CARET);:};
+
+conditional ::= ISEQUAL {:RESULT = new Conditional(Conditional.ConditionalType.ISEQUAL);:}
+    |NOTEQUAL {:RESULT = new Conditional(Conditional.ConditionalType.NOTEQUAL);:}
+    |GEQ {:RESULT = new Conditional(Conditional.ConditionalType.GEQ);:}
+    |LEQ {:RESULT = new Conditional(Conditional.ConditionalType.LEQ);:}
+    |LESS {:RESULT = new Conditional(Conditional.ConditionalType.LESS);:}
+    |GREATER {:RESULT = new Conditional(Conditional.ConditionalType.GREATER);:}
+    |AND {:RESULT = new Conditional(Conditional.ConditionalType.AND);:}
+    |OR {:RESULT = new Conditional(Conditional.ConditionalType.OR);:}
+    |NOT {:RESULT = new Conditional(Conditional.ConditionalType.NOT);:};
+
+const_val ::= INT_CONST:i {:RESULT = new Const_Val(i);:}
+    |REAL_CONST:r {:RESULT = new Const_Val(r);:}
+    |CHAR_CONST:c{:RESULT = new Const_Val(c);:}
+    |BOOL_CONST:b {:RESULT = new Const_Val(b);:}
+    |STRING_CONST:s {:RESULT = new Const_Val(s);:}
+    |LONG_CONST:l {:RESULT = new Const_Val(l);:};
+
+identifier ::= ID:i {:RESULT = new Identifier(i);:};
