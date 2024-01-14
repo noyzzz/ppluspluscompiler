@@ -688,17 +688,27 @@ public class parser extends java_cup.runtime.lr_parser {
     Plexer s;
     parser(Plexer s){ this.s=s; }
  public static void main(String[] args) throws Exception {
+        String inputFileName = "input.in";
+        String outputFileName = "output.ll";
+        //if arg 0 is avilable then input file is arg 0
+        if (args.length > 0) {
+            inputFileName = args[0];
+        }
+        //if arg 1 is avilable then output file is arg 1
+        if (args.length > 1) {
+            outputFileName = args[1];
+        }
         System.out.println("Parsing...");
         ComplexSymbolFactory csf = new ComplexSymbolFactory();
-        InputStream inputStream = new FileInputStream("input.in");
+        InputStream inputStream = new FileInputStream(inputFileName);
         Plexer plexer = new Plexer(new BufferedReader(new InputStreamReader(inputStream)), csf);
         ScannerBuffer lexer = new ScannerBuffer
                 (plexer);
         parser p = new parser(plexer);
         Symbol parse_tree = p.parse();
 
-        File output = new File("output.ll");
-        FileWriter fileWriter = new FileWriter("output.ll");
+        File output = new File(outputFileName);
+        FileWriter fileWriter = new FileWriter(outputFileName);
         BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         Program program = ((Program) parse_tree.value);
         if (program != null) {

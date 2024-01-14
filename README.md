@@ -91,7 +91,7 @@ If you are interested in the details of the grammar or the LLVM code generated b
 
 - Comments can be added using `#` at the beginning of a line.
 
-### Examples
+### Examples of P++ code
 
 ```your_programming_language
 # Your example code here
@@ -103,3 +103,51 @@ record Point {
     int x;
     int y;
 } end record;
+
+
+# Running the P++ Compiler
+
+Our P++ programming language compiler can be run from the command line using the provided command. Follow the steps below to set up and execute the compiler:
+
+## Prerequisites
+
+Make sure you have the following prerequisites installed on your system:
+
+- Java Development Kit (JDK)
+
+## Steps
+
+1. **Clone the Repository:**
+
+    ```bash
+    git clone https://github.com/noyzzz/ppluspluscompiler.git
+    cd ppluspluscompiler
+    ```
+
+2. **Install Dependencies:**
+
+    Ensure you have Java installed on your system.
+
+3. **Build the Compiler:**
+
+    Before running the compiler, ensure you have compiled the Java code.
+
+    Example (using javac):
+
+    ```bash
+    javac -cp .:java-cup-11b-runtime.jar *.java
+    ```
+
+4. **Run the Compiler:**
+
+    Execute the compiler using the provided command.
+
+    Example:
+
+    ```bash
+    java -cp .:java-cup-11b-runtime.jar parser input.in output.ll
+    ```
+
+    In this example, `input.in` contains the P++ source code, and the generated LLVM code will be saved in `output.ll`.
+
+Now, you can easily compile and test your P++ programming language by following the provided steps. Feel free to customize the configuration to suit your specific project structure and compiler setup.
