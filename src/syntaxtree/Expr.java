@@ -74,7 +74,7 @@ public class Expr {
                 type = expr.result.type;
                 break;
             case UMINUS:
-                type = variable.result.type;
+                type = expr.result.type;
                 break;
             case TILDE:
                 type = variable.result.type;

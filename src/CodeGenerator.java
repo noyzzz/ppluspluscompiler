@@ -636,6 +636,21 @@ public class CodeGenerator {
             }
 
         }
+        if (assignmentIR.operator.equals("UMINUS")){
+            switch (res.type.typeEnum){
+                case INT:{
+                    String t1 = new TempVarNameGenerator().toString();
+                    String t2 = new TempVarNameGenerator().toString();
+                    codes.add("%" + res.name.toString() + " = alloca i32");
+                    codes.add("%" + t1 + " = load i32, i32* %" + ((SymbolTableVariable) assignmentIR.argument1).name.toString());
+                    codes.add("%" + t2 + " = sub i32 0, %" + t1);
+                    codes.add("store i32 %" + t2 + ", i32* %" + res.name.toString());
+                    break;
+                }
+                default:
+                    break;
+        }
+    }
 
         if (assignmentIR.operator.equals("^")) {
             switch (res.type.typeEnum) {
