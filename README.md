@@ -110,7 +110,6 @@ end
 
 function int main()
 begin
-
     int n;
     scanf("%d", n);
     printf("%d\n", fib(n));
