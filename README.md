@@ -98,14 +98,25 @@ If you are interested in the details of the grammar or the LLVM code generated b
 
 ```your_programming_language
 # Your example code here
-function int add(int a, int b) {
-    return a + b;
-}
+function int fib(int n)
+begin
+    if (n <= 1) 
+    begin
+        return n;
+    end
+    return fib(n - 1) + fib(n - 2);
 
-record Point {
-    int x;
-    int y;
-} end record;
+end
+
+function int main()
+begin
+
+    int n;
+    scanf("%d", n);
+    printf("%d\n", fib(n));
+end
+
+
 ```
 
 
