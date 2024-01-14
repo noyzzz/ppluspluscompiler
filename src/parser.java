@@ -688,6 +688,7 @@ public class parser extends java_cup.runtime.lr_parser {
     Plexer s;
     parser(Plexer s){ this.s=s; }
  public static void main(String[] args) throws Exception {
+        System.out.println("Parsing...");
         ComplexSymbolFactory csf = new ComplexSymbolFactory();
         InputStream inputStream = new FileInputStream("input.in");
         Plexer plexer = new Plexer(new BufferedReader(new InputStreamReader(inputStream)), csf);

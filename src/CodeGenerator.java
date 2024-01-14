@@ -11,11 +11,11 @@ import java.util.Stack;
  * Created by Arash on 18/06/28.
  */
 public class CodeGenerator {
-    ArrayList<String> codes;
-    IRVisitor irVisitor;
-    ArrayList<String> DCLlist;
-    ArrayList<String> Structlist;
-    SymbolTable root;
+    public ArrayList<String> codes;
+    public IRVisitor irVisitor;
+    public ArrayList<String> DCLlist;
+    public ArrayList<String> Structlist;
+    public SymbolTable root;
     public List<String> stringGlobalCodeList ;
     public List<String> StandardFunctionDeclarations;
 
@@ -38,7 +38,7 @@ public class CodeGenerator {
 
             thisStringDec+="@"+symbolTableVariable.name.toString()+" = private unnamed_addr constant ";
             thisStringDec+="[";
-            String sizeOfString = new Integer(((String)(symbolTableVariable.value)).length() +1).toString();
+            String sizeOfString = Integer.toString(((String) symbolTableVariable.value).length() + 1);
             thisStringDec+= sizeOfString  + " ";
             thisStringDec+="x i8";
             thisStringDec+="] c\"";

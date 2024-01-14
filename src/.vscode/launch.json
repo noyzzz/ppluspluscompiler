@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "parser",
+            "request": "launch",
+            "mainClass": "parser",
+            "projectName": "src_e25fcc8c"
+        },
+        {
+            "name": "Debug Java Parser",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "parser",
+            "args": [],
+            "classPaths": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/java-cup-11b-runtime.jar"
+            ]
+        }
+    ]
+  }
+  

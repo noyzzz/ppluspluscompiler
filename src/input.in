@@ -1,0 +1,22 @@
+function int kir(int n)
+begin
+    return n + 2;
+
+end
+
+function int fib(int n)
+begin
+    if (n <= 1) 
+    begin
+        return n;
+    end
+    return fib(n - 1) + fib(n - 2);
+
+end
+
+function int main()
+begin
+    int n;
+    scanf("%d", n);
+    printf("%d\n", fib(n));
+end

@@ -1,6 +1,5 @@
 package IR;
 
-import symboltable.SymbolTable;
 import symboltable.SymbolTableVariable;
 
 /**

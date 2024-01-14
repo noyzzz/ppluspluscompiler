@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug Java Parser",
+        "type": "java",
+        "request": "launch",
+        "mainClass": "parser",  // Replace "parser" with your actual main class
+        "args": [],
+        "classPaths": [
+          "${workspaceFolder}/java-cup-11b-runtime.jar",  // Adjust the path accordingly
+          "${workspaceFolder}"
+        ],
+        "options": {
+          "classpath": "${workspaceFolder}/java-cup-11b-runtime.jar:${workspaceFolder}"
+        }
+      }
+    ]
+  }
+  

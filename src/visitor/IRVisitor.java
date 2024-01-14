@@ -1,7 +1,7 @@
 package visitor;
 
 import IR.*;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+// import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 import symboltable.MethodSymbolTable;
 import symboltable.Scope;
 import symboltable.SymbolTable;

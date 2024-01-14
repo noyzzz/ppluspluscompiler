@@ -1,7 +1,6 @@
 package IR;
 
 import symboltable.Scope;
-import symboltable.SymbolTable;
 import symboltable.SymbolTableVariable;
 import syntaxtree.Variable;
 
