@@ -6,7 +6,10 @@ This programming language's grammar was generated using the CUP (Construction of
 
 ### CUP Grammar
 
-The formal grammar of our programming language is defined using CUP notation in the [`grammar.cup`](link_to_grammar_file) file. This grammar is used as input to the CUP library for generating the parser.
+Our programming language's formal grammar is defined using CUP notation, a Java-based LALR parser generator. CUP allows you to specify grammar symbols, productions, and associated action code. These actions are executed post-reduction and can be employed for various purposes, such as building an Abstract Syntax Tree (AST). CUP works seamlessly with JFlex, a complementary scanner generator.
+
+For more details, visit [CUP Project](http://www2.cs.tum.edu/projects/cup/).
+
 
 ### Code Generation
 
