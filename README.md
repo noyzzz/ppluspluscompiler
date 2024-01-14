@@ -122,7 +122,7 @@ Make sure you have the following prerequisites installed on your system:
 
     ```bash
     git clone https://github.com/noyzzz/ppluspluscompiler.git
-    cd ppluspluscompiler
+    cd ppluspluscompiler/src
     ```
 
 2. **Install Dependencies:**
