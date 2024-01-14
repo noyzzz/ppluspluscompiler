@@ -154,4 +154,25 @@ Make sure you have the following prerequisites installed on your system:
 
     In this example, `input.in` contains the P++ source code, and the generated LLVM code will be saved in `output.ll`.
 
+5. **Generate Executable from LLVM Code:**
+
+    After successfully generating the LLVM code, you can use clang to create an executable file. Follow the commands below:
+
+    ```bash
+    # Compile LLVM code to object file
+    clang -c -o output.o output.ll
+
+    # Link the object file to create an executable
+    clang -o output output.o
+    ```
+
+    Finally, execute the generated executable:
+
+    ```bash
+    ./output
+    ```
+
+    These commands compile the LLVM code into an object file (`output.o`) and then link it to create the final executable (`output`). You can run the executable to execute the compiled P++ program.
+
+
 Now, you can easily compile and test your P++ programming language by following the provided steps. Feel free to customize the configuration to suit your specific project structure and compiler setup.

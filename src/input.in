@@ -1,9 +1,3 @@
-function int kir(int n)
-begin
-    return n + 2;
-
-end
-
 function int fib(int n)
 begin
     if (n <= 1) 
