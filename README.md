@@ -127,7 +127,11 @@ Our P++ programming language compiler can be run from the command line using the
 
 Make sure you have the following prerequisites installed on your system:
 
-- Java Development Kit (JDK)
+- [Java Development Kit (JDK)](https://www.oracle.com/java/technologies/javase-downloads.html)
+- [clang](https://clang.llvm.org/)
+
+Ensure that both the Java Development Kit (JDK) and clang are properly installed and configured on your machine before proceeding with the setup.
+
 
 ## Steps
 
