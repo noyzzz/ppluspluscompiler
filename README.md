@@ -26,7 +26,7 @@ If you are interested in the details of the grammar or the LLVM code generated b
 
 ### Function Declarations
 
-- `<func_decl>` → function `<type>` id ([ `<arguments>` ]) ; 
+- `<func_decl>` → function `<type>` id ([ `<arguments>` ]) ; | function `<type>` id ([ `<arguments>` ]) `<block>` 
 - `<extern_decl>` → extern `<type>` id ( `<arguments>` ) `<block>` 
 
 ### Arguments
